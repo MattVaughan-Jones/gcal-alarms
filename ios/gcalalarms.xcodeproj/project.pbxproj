@@ -14,7 +14,7 @@
 		96905EF65AED1B983A6B3ABC /* libPods-gcalalarms.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58EEBF8E8E6FB1BC6CAF49B5 /* libPods-gcalalarms.a */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		16CEDF8ED8364453B148B2A5 /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4139BD22874D3A8826B361 /* noop-file.swift */; };
+		10E953570F8A4D639A500824 /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A00468AFA9A423EA1C2E998 /* noop-file.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,8 +31,8 @@
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-gcalalarms/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		1C4139BD22874D3A8826B361 /* noop-file.swift */ = {isa = PBXFileReference; name = "noop-file.swift"; path = "gcalalarms/noop-file.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
-		492F1F1B58B24E8F969F5CC6 /* gcalalarms-Bridging-Header.h */ = {isa = PBXFileReference; name = "gcalalarms-Bridging-Header.h"; path = "gcalalarms/gcalalarms-Bridging-Header.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
+		2A00468AFA9A423EA1C2E998 /* noop-file.swift */ = {isa = PBXFileReference; name = "noop-file.swift"; path = "gcalalarms/noop-file.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
+		BEF5D1B7A32C4BC7B569505D /* gcalalarms-Bridging-Header.h */ = {isa = PBXFileReference; name = "gcalalarms-Bridging-Header.h"; path = "gcalalarms/gcalalarms-Bridging-Header.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,8 +57,8 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB71A68108700A75B9A /* main.m */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				1C4139BD22874D3A8826B361 /* noop-file.swift */,
-				492F1F1B58B24E8F969F5CC6 /* gcalalarms-Bridging-Header.h */,
+				2A00468AFA9A423EA1C2E998 /* noop-file.swift */,
+				BEF5D1B7A32C4BC7B569505D /* gcalalarms-Bridging-Header.h */,
 			);
 			name = gcalalarms;
 			sourceTree = "<group>";
@@ -198,7 +198,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				1E38E5AF72564C7290E2A9C8 /* gcalalarms-Bridging-Header.h in Resources */,
+				2EEBF0C68DCE4815AEC55C90 /* gcalalarms-Bridging-Header.h in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,7 +274,7 @@
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */,
-				16CEDF8ED8364453B148B2A5 /* noop-file.swift in Sources */,
+				10E953570F8A4D639A500824 /* noop-file.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
