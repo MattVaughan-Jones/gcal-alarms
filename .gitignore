@@ -35,8 +35,4 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-# example from expo
 app-example
-
-# Test coverage
-/coverage
