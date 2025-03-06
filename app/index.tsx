@@ -1,13 +1,14 @@
 import { Button, Text, View } from 'react-native';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
-import { GOOGLE_AUTH_URL, GOOGLE_CLIENT_ID } from '../constants';
+import { GOOGLE_AUTH_URL, GOOGLE_CLIENT_ID, REDIRECT_URI } from '../constants';
 import { useEffect, useState } from 'react';
 
 WebBrowser.maybeCompleteAuthSession();
-const redirectUri = AuthSession.makeRedirectUri();
 
-console.log('Redirect URI:', redirectUri);
+if (!(GOOGLE_AUTH_URL && GOOGLE_CLIENT_ID && REDIRECT_URI)) {
+  throw new Error('Missing environment variables');
+}
 
 export default function Index() {
   const [discovery, setDiscovery] = useState<AuthSession.DiscoveryDocument | null>(null);
@@ -35,13 +36,12 @@ export default function Index() {
     {
       clientId: GOOGLE_CLIENT_ID || '',
       responseType: 'code',
-      redirectUri,
+      redirectUri: REDIRECT_URI || '',
       usePKCE: true,
       scopes: [
         'openid',
         'profile',
         'email',
-        'offline_access',
         'https://www.googleapis.com/auth/calendar.readonly'
       ],
     },
@@ -71,7 +71,6 @@ export default function Index() {
         onPress={() => promptAsync()} 
       />
       {error && <Text style={{ color: 'red', marginTop: 10 }}>{error}</Text>}
-      {response && <Text>Auth response received! Check the logs.</Text>}
     </View>
   );
 }
