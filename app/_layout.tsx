@@ -1,12 +1,15 @@
 import { Stack } from "expo-router";
+import { AuthProvider } from "../context/AuthContext";
 
 export default function RootLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerTitle: "GCal Alarms",
-        headerTitleAlign: "center",
-      }}
-    />
+    <AuthProvider>
+      <Stack
+        screenOptions={{
+          headerTitle: "GCal Alarms",
+          headerTitleAlign: "center",
+        }}
+      />
+    </AuthProvider>
   );
 }
