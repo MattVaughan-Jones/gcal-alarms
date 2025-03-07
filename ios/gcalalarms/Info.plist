@@ -27,7 +27,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>myapp</string>
+          <string>gcal-alarms</string>
           <string>com.mattvj.gcalalarms</string>
         </array>
       </dict>
