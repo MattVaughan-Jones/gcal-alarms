@@ -1,6 +1,14 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { GoogleSignin, User } from '@react-native-google-signin/google-signin';
 import * as SecureStore from 'expo-secure-store';
+import { GOOGLE_WEB_CLIENT_ID } from '@/constants';
+
+// Add this near the top of the file, before the AuthProvider
+GoogleSignin.configure({
+  webClientId: GOOGLE_WEB_CLIENT_ID, // Get this from Google Cloud Console
+  // iosClientId: 'IOS_CLIENT_ID', // Required if using iOS
+  // offlineAccess: true, // to access Google API on behalf of the user FROM YOUR SERVER
+});
 
 interface AuthState {
   isLoading: boolean;
@@ -17,25 +25,33 @@ interface AuthContextType extends AuthState {
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | null>(null);
+
+// useAuth hook
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === null) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>({
+  const [authState, setAuthState] = useState<AuthState>({
     isLoading: true,
     isSignedIn: false,
     userInfo: null,
   });
 
   useEffect(() => {
-    // Check if user is signed in on app launch
     checkAuthState();
   }, []);
 
   const checkAuthState = async () => {
     try {
-      const isSignedIn = await GoogleSignin.getCurrentUser();
+      const isSignedIn = GoogleSignin.getCurrentUser();
       if (isSignedIn) {
-        setState({
+        setAuthState({
           isLoading: false,
           isSignedIn: true,
           userInfo: {
@@ -45,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         });
       } else {
-        setState({
+        setAuthState({
           isLoading: false,
           isSignedIn: false,
           userInfo: null,
@@ -53,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Auth state check failed:', error);
-      setState({
+      setAuthState({
         isLoading: false,
         isSignedIn: false,
         userInfo: null,
@@ -65,15 +81,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      const tokens = await GoogleSignin.getTokens();
-
+      
       if (!userInfo.data) {
         throw new Error('User info not found');
       }
 
-      await SecureStore.setItemAsync('accessToken', tokens.accessToken);
+      await SecureStore.setItemAsync('accessToken', (await GoogleSignin.getTokens()).accessToken);
       
-      setState({
+      setAuthState({
         isLoading: false,
         isSignedIn: true,
         userInfo: {
@@ -92,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await GoogleSignin.signOut();
       await SecureStore.deleteItemAsync('accessToken');
-      setState({
+      setAuthState({
         isLoading: false,
         isSignedIn: false,
         userInfo: null,
@@ -104,16 +119,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ ...state, signIn, signOut }}>
+    <AuthContext.Provider value={{ ...authState, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );
 }
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-} 
