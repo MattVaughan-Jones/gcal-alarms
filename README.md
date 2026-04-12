@@ -17,7 +17,13 @@ Without `just`, run the same two commands from the repo root.
 ## Run
 
 ```sh
-flutter run -d android   # or an iOS simulator / device
+just run-android
+```
+
+Uses the AVD named in `justfile` (`android_avd`, default `Pixel_7_Pro_API_35`). List ids with `flutter emulators`; pick another with `ANDROID_AVD=Medium_Phone_API_35 just run-android` or `just android_avd=Medium_Phone_API_35 run-android`.
+
+```sh
+flutter run -d android   # if an emulator is already booted
 ```
 
 See [Flutter documentation](https://docs.flutter.dev/) for environment setup.
