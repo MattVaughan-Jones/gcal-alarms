@@ -1,5 +1,23 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+**/doc/api/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Android (machine-local)
+android/local.properties
+
 # dependencies
 node_modules/
 
