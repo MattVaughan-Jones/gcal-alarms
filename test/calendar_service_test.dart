@@ -9,12 +9,10 @@ import 'calendar_service_test.mocks.dart';
 @GenerateMocks([GoogleSignIn, GoogleSignInAccount])
 void main() {
   late MockGoogleSignIn mockGoogleSignIn;
-  late MockGoogleSignInAccount mockAccount;
   late CalendarService calendarService;
 
   setUp(() {
     mockGoogleSignIn = MockGoogleSignIn();
-    mockAccount = MockGoogleSignInAccount();
     calendarService = CalendarService(googleSignIn: mockGoogleSignIn);
   });
 
