@@ -20,5 +20,6 @@ pub-get:
 analyze:
 	flutter analyze
 
+# Run all tests.
 test:
-	flutter test
+    flutter test

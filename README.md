@@ -12,7 +12,16 @@ just setup
 
 That runs `flutter create . --platforms=android,ios` to keep only Android and iOS embedders in sync with the template, then `flutter pub get`. Run `just` with no arguments to list recipes.
 
-Without `just`, run the same two commands from the repo root.
+### Android Configuration
+
+The `android/local.properties` file is excluded from version control as it contains paths specific to your local machine. If you are missing this file, you can recreate it with the following template:
+
+```properties
+sdk.dir=/path/to/android/sdk
+flutter.sdk=/path/to/flutter/sdk
+```
+
+Alternatively, running `flutter pub get` or opening the project in Android Studio/VS Code with the Flutter extension will usually regenerate this file for you.
 
 ## Run
 
