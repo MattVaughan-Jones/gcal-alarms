@@ -6,7 +6,7 @@ void main() {
 
   group('UI Basic Tests', () {
     testWidgets('Renders Meeting Guard and displays empty state', (WidgetTester tester) async {
-      await tester.pumpWidget(const MeetingGuardPOC());
+      await tester.pumpWidget(const MeetingGuard());
       expect(find.text('Meeting Guard'), findsOneWidget);
       expect(find.text('No events found. Refresh to sign in.'), findsOneWidget);
     });

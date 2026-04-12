@@ -4,11 +4,11 @@ import 'package:googleapis/calendar/v3.dart' as calendar;
 import 'calendar_service.dart';
 
 void main() {
-  runApp(const MeetingGuardPOC());
+  runApp(const MeetingGuard());
 }
 
-class MeetingGuardPOC extends StatelessWidget {
-  const MeetingGuardPOC({super.key});
+class MeetingGuard extends StatelessWidget {
+  const MeetingGuard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,19 +18,19 @@ class MeetingGuardPOC extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const POCPage(),
+      home: const CalendarPage(),
     );
   }
 }
 
-class POCPage extends StatefulWidget {
-  const POCPage({super.key});
+class CalendarPage extends StatefulWidget {
+  const CalendarPage({super.key});
 
   @override
-  State<POCPage> createState() => _POCPageState();
+  State<CalendarPage> createState() => _CalendarPageState();
 }
 
-class _POCPageState extends State<POCPage> {
+class _CalendarPageState extends State<CalendarPage> {
   static const platform = MethodChannel('meeting_guard/alarm');
   final CalendarService _calendarService = CalendarService();
   List<calendar.Event> _events = [];

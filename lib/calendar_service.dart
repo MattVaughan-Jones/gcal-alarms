@@ -50,10 +50,13 @@ class CalendarService {
 
     try {
       final calendarApi = calendar.CalendarApi(client);
+      final now = DateTime.now().toUtc();
+      final fiveDaysFromNow = now.add(const Duration(days: 5));
+
       final events = await calendarApi.events.list(
         'primary',
-        timeMin: DateTime.now().toUtc(),
-        maxResults: 10,
+        timeMin: now,
+        timeMax: fiveDaysFromNow,
         singleEvents: true,
         orderBy: 'startTime',
       );
