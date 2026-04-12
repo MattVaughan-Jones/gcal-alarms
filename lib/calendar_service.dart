@@ -5,11 +5,15 @@ import 'package:googleapis_auth/googleapis_auth.dart' as auth;
 import 'package:http/http.dart' as http;
 
 class CalendarService {
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: <String>[
-      calendar.CalendarApi.calendarReadonlyScope,
-    ],
-  );
+  final GoogleSignIn _googleSignIn;
+
+  CalendarService({GoogleSignIn? googleSignIn})
+      : _googleSignIn = googleSignIn ??
+            GoogleSignIn(
+              scopes: <String>[
+                calendar.CalendarApi.calendarReadonlyScope,
+              ],
+            );
 
   GoogleSignInAccount? _currentUser;
 
