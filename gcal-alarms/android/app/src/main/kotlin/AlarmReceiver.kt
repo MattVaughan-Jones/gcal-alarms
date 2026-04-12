@@ -1,4 +1,4 @@
-package ai.openclaw.meeting_guard
+package meeting_guard
 
 import android.content.BroadcastReceiver
 import android.content.Context

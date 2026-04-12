@@ -29,7 +29,7 @@ class POCPage extends StatefulWidget {
 }
 
 class _POCPageState extends State<POCPage> {
-  static const platform = MethodChannel('ai.openclaw.meeting_guard/alarm');
+  static const platform = MethodChannel('meeting_guard/alarm');
 
   Future<void> _scheduleTestAlarm() async {
     try {

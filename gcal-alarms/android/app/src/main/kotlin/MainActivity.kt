@@ -1,4 +1,4 @@
-package ai.openclaw.meeting_guard
+package meeting_guard
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -11,7 +11,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterActivity() {
-    private val CHANNEL = "ai.openclaw.meeting_guard/alarm"
+    private val CHANNEL = "meeting_guard/alarm"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
