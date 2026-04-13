@@ -36,6 +36,9 @@ class _CalendarPageState extends State<CalendarPage> {
   List<calendar.Event> _events = [];
   bool _isLoading = false;
 
+  // Map to store alarm lead times (minutes before event) keyed by event ID
+  final Map<String, int> _activeAlarms = {};
+
   Future<void> _fetchEvents() async {
     setState(() => _isLoading = true);
     final events = await _calendarService.getUpcomingEvents();
@@ -45,23 +48,35 @@ class _CalendarPageState extends State<CalendarPage> {
     });
   }
 
-  Future<void> _scheduleAlarm(calendar.Event event) async {
+  Future<void> _scheduleAlarm(calendar.Event event, int minutesBefore) async {
     final startTime = event.start?.dateTime ?? event.start?.date;
     if (startTime == null) return;
 
-    final diff = startTime.difference(DateTime.now()).inSeconds;
+    final alarmTime = startTime.subtract(Duration(minutes: minutesBefore));
+    final diff = alarmTime.difference(DateTime.now()).inSeconds;
+
     if (diff <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Event is already in the past!')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Alarm time is in the past!')),
+        );
+      }
       return;
     }
 
     try {
       await platform.invokeMethod('scheduleAlarm', {"seconds": diff});
       if (mounted) {
+        setState(() {
+          if (event.id != null) {
+            _activeAlarms[event.id!] = minutesBefore;
+          }
+        });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Alarm set for ${event.summary}')),
+          SnackBar(
+            content: Text(
+                'Alarm set for ${event.summary} ($minutesBefore min before)'),
+          ),
         );
       }
     } on PlatformException catch (e) {
@@ -71,6 +86,67 @@ class _CalendarPageState extends State<CalendarPage> {
         );
       }
     }
+  }
+
+  Future<void> _deleteAlarm(calendar.Event event) async {
+    // TODO: Implement platform method to cancel a specific alarm via AlarmManager.
+    // This is critical for preventing ghost alarms if an event is canceled or lead time changed.
+    setState(() {
+      if (event.id != null) {
+        _activeAlarms.remove(event.id);
+      }
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Alarm deleted for ${event.summary}')),
+    );
+  }
+
+  void _showEditModal(calendar.Event event) {
+    final eventId = event.id;
+    if (eventId == null) return;
+
+    final initialMinutes = _activeAlarms[eventId] ?? 0;
+    final textController = TextEditingController(text: initialMinutes.toString());
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Edit Alarm for ${event.summary}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Minutes before event:'),
+            TextField(
+              controller: textController,
+              keyboardType: TextInputType.number,
+              autofocus: true,
+            ),
+          ],
+        ),
+        actions: [
+          if (_activeAlarms.containsKey(eventId))
+            TextButton(
+              onPressed: () {
+                _deleteAlarm(event);
+                Navigator.pop(context);
+              },
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final mins = int.tryParse(textController.text) ?? 0;
+              _scheduleAlarm(event, mins);
+              Navigator.pop(context);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -87,7 +163,10 @@ class _CalendarPageState extends State<CalendarPage> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await _calendarService.signOut();
-              setState(() => _events = []);
+              setState(() {
+                _events = [];
+                _activeAlarms.clear();
+              });
             },
           ),
         ],
@@ -100,16 +179,54 @@ class _CalendarPageState extends State<CalendarPage> {
                   itemCount: _events.length,
                   itemBuilder: (context, index) {
                     final event = _events[index];
+                    final eventId = event.id;
+                    final hasAlarm = eventId != null && _activeAlarms.containsKey(eventId);
+                    final alarmMins = hasAlarm ? _activeAlarms[eventId] : null;
+
                     return ListTile(
                       title: Text(event.summary ?? 'No Title'),
-                      subtitle: Text(
-                        (event.start?.dateTime?.toLocal() ?? event.start?.date)
-                            .toString(),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            (event.start?.dateTime?.toLocal() ?? event.start?.date)
+                                .toString(),
+                          ),
+                          if (hasAlarm)
+                            Row(
+                              children: [
+                                const Icon(Icons.alarm, size: 16, color: Colors.deepPurple),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Alarm: $alarmMins min before',
+                                  style: const TextStyle(
+                                      color: Colors.deepPurple,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                        ],
                       ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.alarm_add),
-                        onPressed: () => _scheduleAlarm(event),
-                      ),
+                      trailing: hasAlarm
+                          ? IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () => _showEditModal(event),
+                            )
+                          : PopupMenuButton<int>(
+                              icon: const Icon(Icons.alarm_add),
+                              onSelected: (minutes) {
+                                if (minutes == -1) {
+                                  _showEditModal(event);
+                                } else {
+                                  _scheduleAlarm(event, minutes);
+                                }
+                              },
+                              itemBuilder: (context) => [
+                                const PopupMenuItem(value: 3, child: Text('3 min before')),
+                                const PopupMenuItem(value: 20, child: Text('20 min before')),
+                                const PopupMenuItem(value: -1, child: Text('Custom...')),
+                              ],
+                            ),
                     );
                   },
                 ),
