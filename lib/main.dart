@@ -89,8 +89,8 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Future<void> _deleteAlarm(calendar.Event event) async {
-    // In a real app, we'd need a platform method to cancel a specific alarm.
-    // For now, we'll just update the UI state.
+    // TODO: Implement platform method to cancel a specific alarm via AlarmManager.
+    // This is critical for preventing ghost alarms if an event is canceled or lead time changed.
     setState(() {
       if (event.id != null) {
         _activeAlarms.remove(event.id);
