@@ -27,19 +27,19 @@ class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
 
   @override
-  State<CalendarPage> createState() => _CalendarPageState();
+  CalendarPageState createState() => CalendarPageState();
 }
 
-class _CalendarPageState extends State<CalendarPage> {
+class CalendarPageState extends State<CalendarPage> {
   static const platform = MethodChannel('meeting_guard/alarm');
   final CalendarService _calendarService = CalendarService();
   List<calendar.Event> _events = [];
   bool _isLoading = false;
 
   // Map to store alarm lead times (minutes before event) keyed by event ID
-  final Map<String, int> _activeAlarms = {};
+  final Map<String, int> activeAlarms = {};
 
-  Future<void> _fetchEvents() async {
+  Future<void> fetchEvents() async {
     setState(() => _isLoading = true);
     final events = await _calendarService.getUpcomingEvents();
     setState(() {
@@ -48,9 +48,15 @@ class _CalendarPageState extends State<CalendarPage> {
     });
   }
 
-  Future<void> _scheduleAlarm(calendar.Event event, int minutesBefore) async {
+  // Helper to get a stable integer ID from a string event ID for Android PendingIntent
+  int getAlarmId(String eventId) {
+    return eventId.hashCode.abs();
+  }
+
+  Future<void> scheduleAlarm(calendar.Event event, int minutesBefore) async {
     final startTime = event.start?.dateTime ?? event.start?.date;
-    if (startTime == null) return;
+    final eventId = event.id;
+    if (startTime == null || eventId == null) return;
 
     final alarmTime = startTime.subtract(Duration(minutes: minutesBefore));
     final diff = alarmTime.difference(DateTime.now()).inSeconds;
@@ -65,12 +71,13 @@ class _CalendarPageState extends State<CalendarPage> {
     }
 
     try {
-      await platform.invokeMethod('scheduleAlarm', {"seconds": diff});
+      await platform.invokeMethod('scheduleAlarm', {
+        "seconds": diff,
+        "id": getAlarmId(eventId),
+      });
       if (mounted) {
         setState(() {
-          if (event.id != null) {
-            _activeAlarms[event.id!] = minutesBefore;
-          }
+          activeAlarms[eventId] = minutesBefore;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -88,24 +95,36 @@ class _CalendarPageState extends State<CalendarPage> {
     }
   }
 
-  Future<void> _deleteAlarm(calendar.Event event) async {
-    // TODO: Implement platform method to cancel a specific alarm via AlarmManager.
-    // This is critical for preventing ghost alarms if an event is canceled or lead time changed.
-    setState(() {
-      if (event.id != null) {
-        _activeAlarms.remove(event.id);
-      }
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Alarm deleted for ${event.summary}')),
-    );
-  }
-
-  void _showEditModal(calendar.Event event) {
+  Future<void> deleteAlarm(calendar.Event event) async {
     final eventId = event.id;
     if (eventId == null) return;
 
-    final initialMinutes = _activeAlarms[eventId] ?? 0;
+    try {
+      await platform.invokeMethod('cancelAlarm', {
+        "id": getAlarmId(eventId),
+      });
+      setState(() {
+        activeAlarms.remove(eventId);
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Alarm deleted for ${event.summary}')),
+        );
+      }
+    } on PlatformException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete alarm: ${e.message}')),
+        );
+      }
+    }
+  }
+
+  void showEditModal(calendar.Event event) {
+    final eventId = event.id;
+    if (eventId == null) return;
+
+    final initialMinutes = activeAlarms[eventId] ?? 0;
     final textController = TextEditingController(text: initialMinutes.toString());
 
     showDialog(
@@ -124,10 +143,10 @@ class _CalendarPageState extends State<CalendarPage> {
           ],
         ),
         actions: [
-          if (_activeAlarms.containsKey(eventId))
+          if (activeAlarms.containsKey(eventId))
             TextButton(
               onPressed: () {
-                _deleteAlarm(event);
+                deleteAlarm(event);
                 Navigator.pop(context);
               },
               child: const Text('Delete', style: TextStyle(color: Colors.red)),
@@ -139,7 +158,7 @@ class _CalendarPageState extends State<CalendarPage> {
           ElevatedButton(
             onPressed: () {
               final mins = int.tryParse(textController.text) ?? 0;
-              _scheduleAlarm(event, mins);
+              scheduleAlarm(event, mins);
               Navigator.pop(context);
             },
             child: const Text('Save'),
@@ -157,7 +176,7 @@ class _CalendarPageState extends State<CalendarPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _fetchEvents,
+            onPressed: fetchEvents,
           ),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -165,7 +184,7 @@ class _CalendarPageState extends State<CalendarPage> {
               await _calendarService.signOut();
               setState(() {
                 _events = [];
-                _activeAlarms.clear();
+                activeAlarms.clear();
               });
             },
           ),
@@ -180,8 +199,8 @@ class _CalendarPageState extends State<CalendarPage> {
                   itemBuilder: (context, index) {
                     final event = _events[index];
                     final eventId = event.id;
-                    final hasAlarm = eventId != null && _activeAlarms.containsKey(eventId);
-                    final alarmMins = hasAlarm ? _activeAlarms[eventId] : null;
+                    final hasAlarm = eventId != null && activeAlarms.containsKey(eventId);
+                    final alarmMins = hasAlarm ? activeAlarms[eventId] : null;
 
                     return ListTile(
                       title: Text(event.summary ?? 'No Title'),
@@ -210,15 +229,15 @@ class _CalendarPageState extends State<CalendarPage> {
                       trailing: hasAlarm
                           ? IconButton(
                               icon: const Icon(Icons.edit),
-                              onPressed: () => _showEditModal(event),
+                              onPressed: () => showEditModal(event),
                             )
                           : PopupMenuButton<int>(
                               icon: const Icon(Icons.alarm_add),
                               onSelected: (minutes) {
                                 if (minutes == -1) {
-                                  _showEditModal(event);
+                                  showEditModal(event);
                                 } else {
-                                  _scheduleAlarm(event, minutes);
+                                  scheduleAlarm(event, minutes);
                                 }
                               },
                               itemBuilder: (context) => [
